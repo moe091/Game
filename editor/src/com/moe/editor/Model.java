@@ -20,6 +20,7 @@ public class Model {
 	Loader loader; //might move
 	//the array that holds all the objects in the game
 	private Array<GameObject> gameObjects = new Array<GameObject>();
+	private Array<GameObject.ObjectBuilder> creationQueue = new Array<GameObject.ObjectBuilder>();
 	
 	//initialize world and loader
 	public Model() {
@@ -31,6 +32,10 @@ public class Model {
 	//loop through all objects and call their update methods, update box2dWorld
 	public void update(float delta) {
 		world.step(delta, 7, 3);
+		for (int i = creationQueue.size - 1; i >= 0; i--) {
+			gameObjects.add(creationQueue.get(i).build());
+			creationQueue.removeIndex(i);
+		}
 		for (int i = 0; i < gameObjects.size; i++) {
 			gameObjects.get(i).update(delta);
 		}
@@ -62,6 +67,11 @@ public class Model {
 	public void removeObject(GameObject gameObject) {
 		world.destroyBody(gameObject.getBody());
 		gameObjects.removeValue(gameObject, true);
+		
+	}
+
+	public void queueObject(GameObject.ObjectBuilder build) {
+		creationQueue.add(build);
 		
 	}
 }

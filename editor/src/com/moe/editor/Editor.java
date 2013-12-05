@@ -32,10 +32,7 @@ public class Editor {
 	//the view class will call a method in the editor that returns the current object and creates that
 	//for now it'll create whatever I hardcode into this method
 	public void createObject(Vector3 vec) {
-		model.addObject(curObject
-				.location(vec.x, vec.y)
-				.build()
-		);
+		model.queueObject(curObject.location(vec.x, vec.y));
 	}
 	
 	/*
