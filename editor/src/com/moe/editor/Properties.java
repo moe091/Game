@@ -41,6 +41,9 @@ public class Properties extends JFrame {
 	private JLabel lblRotspeed;
 	private JTextField txtRotationSpeed;
 	private JButton btnUpdate;
+	private JLabel lblSelectedobject;
+	private JButton btnUpdatebuilder;
+	private JLabel lblSelection;
 
 
 	public Properties(Model model, Editor editor) {
@@ -96,6 +99,9 @@ public class Properties extends JFrame {
 		rdbtnKinematic = new JRadioButton("Kinematic");
 		buttonGroup.add(rdbtnKinematic);
 		contentPane.add(rdbtnKinematic, "6, 2, left, default");
+		
+		lblSelection = new JLabel("selection");
+		contentPane.add(lblSelection, "8, 2");
 		
 		JLabel lblName = new JLabel("Name");
 		contentPane.add(lblName, "2, 4, right, default");
@@ -161,19 +167,43 @@ public class Properties extends JFrame {
 		contentPane.add(txtRotationSpeed, "8, 10, fill, default");
 		txtRotationSpeed.setColumns(10);
 		
-		btnUpdate = new JButton("Update");
+		btnUpdate = new JButton("updateObject");
 		btnUpdate.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent arg0) {
 				updateClicked();
 			}
 		});
-		contentPane.add(btnUpdate, "4, 20");
+		
+		btnUpdatebuilder = new JButton("updateBuilder");
+		btnUpdatebuilder.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+				updateBuilderClick();
+			}
+		});
+		contentPane.add(btnUpdatebuilder, "8, 16");
+		
+		lblSelectedobject = new JLabel("selectedObject");
+		contentPane.add(lblSelectedobject, "4, 18");
+		contentPane.add(btnUpdate, "8, 18");
 	}
 
+	protected void updateBuilderClick() {
+		editor.updateBuilderProps();
+		
+	}
 
+	public float getFriction() {
+		return Float.parseFloat(txtFriction.getText());
+	}
+	public float getDensity() {
+		return Float.parseFloat(txtDensity.getText());
+	}
+	public float getRestitution() {
+		return Float.parseFloat(txtRestitution.getText());
+	}
 	protected void updateClicked() {
-		System.out.println("update clicked");
 		editor.updateProperties();
 	}
 
@@ -212,6 +242,33 @@ public class Properties extends JFrame {
 		} catch (NumberFormatException e) {
 			return 1;
 		}
+	}
+	
+	
+	
+	
+	public void updatePropertiesWindow(GameObject.ObjectBuilder builder) {
+		this.txtBodyref.setText(builder.getBodyRef());
+		this.txtScale.setText(Float.toString(builder.getScale()));
+		if (builder.getBodyType() == BodyType.DynamicBody) 
+			this.rdbtnDynamic.doClick();
+		else if (builder.getBodyType() == BodyType.StaticBody) {
+			this.rdbtnStatic.doClick();
+		} else if (builder.getBodyType() == BodyType.KinematicBody) {
+			this.rdbtnKinematic.doClick();
+		}
+		this.txtName.setText(builder.name + " ");
+		this.txtRestitution.setText(Float.toString(builder.getRestitution()));
+		this.txtFriction.setText(Float.toString(builder.getFriction()));
+		this.txtDensity.setText(Float.toString(builder.getDensity()));
+		this.txtRotation.setText(Float.toString(builder.getRotation()));
+		
+		if (editor.isObjectSelected())
+			lblSelection.setText("Object");
+		else
+			lblSelection.setText("Builder");
+		
+		System.out.println("UPDATE SHIT " + builder.getScale());
 	}
 
 }

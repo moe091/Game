@@ -2,6 +2,11 @@ package com.moe.editor;
 
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.moe.editor.GameObject.ObjectBuilder;
+
+/*
+ * controls editing game objects
+ */
 
 public class Editor {
 	/*
@@ -12,7 +17,7 @@ public class Editor {
 	 * object is selected, and upon updating the object will be deleted and a new one will be created from the objectBuilder
 	 */
 	private boolean objectSelected = false;
-	private GameObject.ObjectBuilder curObject;
+	private int selIndex;
 	private GameObject selectedObject;
 	
 	private View view;
@@ -22,27 +27,33 @@ public class Editor {
 	public Editor(View view, Model model) {
 		this.view = view;
 		this.model = model;
-		
-		curObject = new GameObject.ObjectBuilder("ball", model);
-		curObject.bodyType(BodyType.DynamicBody).scale(2.4f).restitution(1.85f);
+		model.setEditor(this);
 	}
 	
 	
 	//Creates the current Object. In the future the current object will be decided based on which one is selected in the editor.
 	//the view class will call a method in the editor that returns the current object and creates that
 	//for now it'll create whatever I hardcode into this method
-	public void createObject(Vector3 vec) {
-		model.queueObject(curObject.location(vec.x, vec.y));
+	public void createObject(Vector3 vec, GameObject.ObjectBuilder builder) {
+		model.queueObject(builder.location(vec.x, vec.y));
 	}
 	
-	/*
-	 * this method is called to set the curObject object builder. the curObject builder is used to create an object when the user clicks the 
-	 * screen
-	 */
-	public void setCurObject(GameObject.ObjectBuilder curObject, boolean objSelected) {
-		this.curObject = curObject;
-		this.objectSelected = objSelected;
+	
+	public void setObject(GameObject object) {
+		selectedObject = object;
+		if (selectedObject != null) {
+			objectSelected = true;
+			selIndex = model.getIndex(object);
+			if (properties != null) {
+				properties.updatePropertiesWindow(object.getBuilder());
+				System.out.println("selection - " + object.getBuilder().getScale());
+			}
+		} else {
+			objectSelected = false;
+			selIndex = -1;
+		}
 	}
+	
 	public boolean isObjectSelected() {
 		return objectSelected;
 	}
@@ -54,27 +65,59 @@ public class Editor {
 		}
 	}
 	
+	public GameObject getSelectedObject() {
+		return selectedObject;
+	}
 	//Called from the properties editor, tells Editor to update the current object. Calls updateCurObject at appropriate time
 	//depending on whether an objectBuilder or an existing object is selected.
 	public void updateProperties() {
-		System.out.println("update properties");
-		if (objectSelected) {
-			Vector3 vec = new Vector3(curObject.getGameObject().getBody().getTransform().getPosition().x, curObject.getGameObject().getBody().getTransform().getPosition().y, 0);
-			curObject.getGameObject().delete();
-			objectSelected = false;
-			updateCurObject();
-			createObject(vec);
-		} else {
-			updateCurObject();
-		}
+			Vector3 vec = new Vector3(selectedObject.getBody().getTransform().getPosition().x, selectedObject.getBody().getTransform().getPosition().y, 0);
+			
+			updateExistingObject(vec, selectedObject);
+			properties.updatePropertiesWindow(selectedObject.getBuilder());
+
 	}
 	
+	private void updateExistingObject(Vector3 vec, GameObject obj) {
+		model.world.destroyBody(obj.getBody());
+		GameObject.ObjectBuilder builder = obj.getBuilder();
+		updateCurObject(builder);
+		
+		model.removeObject(obj);
+		createObject(vec, builder);
+		this.setObject(null);
+	}
+
+
 	//called from updateProperties(), actually updates the curObject ObjectBuilder.
-	public void updateCurObject() {
-		System.out.println("updateCurObject()");
-		curObject.bodyType(properties.getBodyType());
-		curObject.rotSpeed(properties.getRotSpeed());
-		curObject.rotation(properties.getRotation());
-		curObject.scale(properties.getScale());
+	public void updateCurObject(GameObject.ObjectBuilder builder) {
+		builder.bodyType(properties.getBodyType());
+		builder.rotSpeed(properties.getRotSpeed());
+		builder.rotation(properties.getRotation());
+		builder.scale(properties.getScale());
+		builder.friction(properties.getFriction());
+		builder.restitution(properties.getRestitution());
+		builder.density(properties.getDensity());
+	}
+
+
+	public void blankClick() {
+		
+		
+	}
+
+
+	public void updatePropertiesWindow(ObjectBuilder curObject) {
+		if (properties != null)
+			properties.updatePropertiesWindow(curObject);
+		
+	}
+
+
+	public void updateBuilderProps() {
+		updateCurObject(view.getSelectedBuilder());
+		properties.updatePropertiesWindow(view.getSelectedBuilder());
+		System.out.println("IM THE ELSE");
+		
 	}
 }

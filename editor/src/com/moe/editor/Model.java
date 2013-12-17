@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.utils.Array;
+import com.moe.editor.GameObject.ObjectBuilder;
 
 /*
  * Model holds the world and all the objects in it. It has an update function which can be called to update the world and objects
@@ -17,11 +18,11 @@ import com.badlogic.gdx.utils.Array;
 public class Model {
 	//the physics world and loader(might move loader later)
 	World world;
+	Editor editor;
 	Loader loader; //might move
 	//the array that holds all the objects in the game
 	private Array<GameObject> gameObjects = new Array<GameObject>();
 	private Array<GameObject.ObjectBuilder> creationQueue = new Array<GameObject.ObjectBuilder>();
-	
 	//initialize world and loader
 	public Model() {
 		 loader = new Loader("Physics/bodies.json");
@@ -29,17 +30,30 @@ public class Model {
 		 world = new World(new Vector2(0, -5), true);
 	}
 
+	public void setEditor(Editor editor) {
+		this.editor = editor;
+	}
 	//loop through all objects and call their update methods, update box2dWorld
 	public void update(float delta) {
 		world.step(delta, 7, 3);
 		for (int i = creationQueue.size - 1; i >= 0; i--) {
-			gameObjects.add(creationQueue.get(i).build());
+			
+			if (editor!= null) {
+				//editor.setObject(creationQueue.get(i).build());
+				//gameObjects.add(editor.getSelectedObject());
+				gameObjects.add(creationQueue.get(i).build());
+			} else {
+				gameObjects.add(creationQueue.get(i).build());
+			}
 			creationQueue.removeIndex(i);
+			
 		}
 		for (int i = 0; i < gameObjects.size; i++) {
 			gameObjects.get(i).update(delta);
 		}
+		
 	}
+	
 	public void tempSetup() {
 	
 	}
@@ -65,8 +79,8 @@ public class Model {
 	}
 
 	public void removeObject(GameObject gameObject) {
-		world.destroyBody(gameObject.getBody());
 		gameObjects.removeValue(gameObject, true);
+		gameObject = null;
 		
 	}
 
@@ -74,4 +88,10 @@ public class Model {
 		creationQueue.add(build);
 		
 	}
+
+	public int getIndex(GameObject object) {
+		return gameObjects.indexOf(object, true);
+	}
+
+
 }

@@ -37,22 +37,27 @@ private ObjectList objList;
 		for (int i = model.getNumObjects() - 1; i >= 0; i--) {
 			model.getObject(i).getSprite().draw(batch);
 		}
+		//draw the object list bar on top of everything else
+		objList.draw(batch);
 		batch.end();
 		
-		//draw the object list bar on top of everything else
-		objList.draw();
+		
 	}
 	
 	
-
+	public GameObject.ObjectBuilder getSelectedBuilder() {
+		return objList.getCurObject();
+	}
 	/*
 	 * used to handle click events coming from the controller class. View mediates between controller and model so input events will pass through 
 	 * the view class in order to keep the control decoupled from the model
 	 */
 	public void click(Vector3 vec) {
-		if (!objList.checkClick(vec.x, vec.y)) {
+		System.out.println("REG CLICK");
+		if (!objList.click(vec.x, vec.y)) {
 			camera.unproject(vec);
-			editor.createObject(vec);
+			editor.createObject(vec, getSelectedBuilder());
+			editor.blankClick();
 		}
 	}
 
@@ -62,14 +67,20 @@ private ObjectList objList;
 	}
 
 	public void altClick(Vector3 vec) {
-		System.out.println("x = " + vec.x + ", y = " + vec.y);
+		System.out.println("ALT CLICK");
 		camera.unproject(vec);
-		System.out.println("x = " + vec.x + ", y = " + vec.y);
-		
+		int selection = -1;
 		for (int i = 0; i < model.getNumObjects(); i++) {
 			if (model.isTouching(i, vec)) {
-				editor.setCurObject(model.getObject(i).getBuilder(), true);
-				
+				selection = i;
+			}
+		}
+		if (selection >= 0) {
+			editor.setObject(model.getObject(selection));
+		} else {
+			editor.setObject(null);
+			for (int i = 0; i < model.getNumObjects(); i++) {
+				System.out.println(model.getObject(i).getBuilder().getScale());
 			}
 		}
 		

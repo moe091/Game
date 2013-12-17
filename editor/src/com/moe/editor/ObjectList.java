@@ -7,12 +7,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.utils.Array;
 import com.moe.editor.GameObject.ObjectBuilder;
+import com.moe.editor.framework.RenderableWindow;
 
 /*
  * The Panel that holds a selection of objects to choose from. Select an object and then click to create(alt click is used to select/drag)
  * 
  */
-public class ObjectList {
+public class ObjectList implements RenderableWindow {
 private final float objectHeight = 50;
 private final float objectWidth = 50;
 private final int gap = 10;
@@ -34,6 +35,9 @@ private Array<ObjectButton> buttons = new Array<ObjectButton>();
 private Texture back = new Texture(Gdx.files.internal("Graphics/Test/objectbg.png"));
 private Texture sidebg = new Texture(Gdx.files.internal("Graphics/Test/sidebg.png"));
 private Texture selected = new Texture(Gdx.files.internal("Graphics/Test/objectselected.png"));
+private Texture highlight = new Texture(Gdx.files.internal("Graphics/Test/highlight.png"));
+
+private GameObject.ObjectBuilder curObject;
 
 	public ObjectList(View view, Model model, Editor editor, float x, float y) {
 		this.view = view;
@@ -48,28 +52,9 @@ private Texture selected = new Texture(Gdx.files.internal("Graphics/Test/objects
 		this.y = y;
 		this.x2 = x + width;
 		this.y2 = y + height;
-	}
-	
-	/*
-	 * Checks if a click is on the objectList panel. if it is it returns true and sends the click event to the click method
-	 * if not it just returns falls with no side-effect
-	 */
-	public boolean checkClick(float x, float y) {
-		y = Gdx.graphics.getHeight() - y;
-		if (x > this.x && x < this.x2 && y > this.y && y < this.y2) {
-			click(x - this.x, y - this.y);
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
-	/*
-	 * This is the method that is handles a click on the actual panel. The x and y parameters are the local coordinates of the click
-	 */
-	private void click(float x, float y) {
-		y-= scrollY;
-		select((int) y / (50 + gap));
+		
+		curObject = new GameObject.ObjectBuilder("ball", model);
+		curObject.bodyType(BodyType.DynamicBody).scale(2.4f).restitution(1.85f);
 	}
 	
 	/*
@@ -81,18 +66,19 @@ private Texture selected = new Texture(Gdx.files.internal("Graphics/Test/objects
 	 */
 	private void select(int i) {
 		if (i < buttons.size) {
-			editor.setCurObject(buttons.get(i).builder, false);
+			curObject = buttons.get(i).builder;
 			selection = i;
 		}
 		
+		editor.updatePropertiesWindow(curObject);
+		
 	}
 
-
 	// This just draws the actual panel
-	public void draw() {
+	public void draw(SpriteBatch camBatch) {
 		batch.begin();
 		
-		batch.draw(sidebg, x - 20, y - 100, width + 20, height + 200);
+		batch.draw(sidebg, x - 20, y - 25, width + 20, height + 50);
 		for (int i = 0; i < buttons.size; i++) {
 			if (selection != i)
 				batch.draw(back, x - 9, (y + i * (objectHeight + gap)) - 9, 68, 68);
@@ -103,9 +89,23 @@ private Texture selected = new Texture(Gdx.files.internal("Graphics/Test/objects
 			else 
 				batch.draw(buttons.get(i).texture, x, y + i * (objectHeight + gap) + 15, objectWidth, objectHeight * ((float) buttons.get(i).texture.getHeight() / (float) buttons.get(i).texture.getWidth()));
 		}
+		if (editor.isObjectSelected()) {
+			if (editor.getSelectedObject() != null) {
+				batch.draw(highlight, editor.getSelectedObject().getSprite().getX(), editor.getSelectedObject().getSprite().getY(), editor.getSelectedObject().getSprite().getWidth(), editor.getSelectedObject().getSprite().getHeight());
+				//System.out.println("SELECTED x=" + editor.getSelectedObject().getSprite().getX());
+			}
+		}
 		batch.end();
 	}
 	
+	public GameObject.ObjectBuilder getCurObject() {
+		return curObject;
+	}
+
+	public void setCurObject(GameObject.ObjectBuilder curObject) {
+		this.curObject = curObject;
+	}
+
 	/*
 	 * Inner class to wrap an object builder and a texture for the buttons. it links the texture used for a button with a complete objectBuilder to create that object
 	 */
@@ -121,6 +121,25 @@ private Texture selected = new Texture(Gdx.files.internal("Graphics/Test/objects
 					.bodyType(BodyType.StaticBody)
 					.scale(3f);
 		}
+	}
+
+	@Override
+	public boolean click(float x, float y) {
+		if (x > this.x && x < this.x2 && y > this.y && y < this.y2) {
+			relativeClick(x - this.x, y - this.y);
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
+
+	@Override
+	public void relativeClick(float x, float y) {
+		y-= scrollY;
+		y = this.height - y - 13;
+		select((int) ((int) y / (objectHeight + gap)));
+		
 	}
 
 }

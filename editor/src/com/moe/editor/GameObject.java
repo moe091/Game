@@ -23,6 +23,8 @@ private Sprite sprite;
 private Vector2 origin;
 private ObjectBuilder builder;
 
+ObjectBuilder replacement;
+boolean replace = false;
 //PlayScreen and model are always passed into the constructor(or always part of the builder object)
 PlayScreen screen;
 Model model;
@@ -33,10 +35,12 @@ private float rotation;
 
 	private GameObject(ObjectBuilder builder) {
 		//Mandatory
-		this(builder.model, builder.bodyRef, builder.x, builder.y, builder.bodyType, builder.scale, builder);
+		this(builder.model, builder.bodyRef, builder.x, builder.y, builder.bodyType, builder.scale, builder.density, builder.restitution, builder.friction, builder);
+		
 		
 		//extra
-		this.builder = builder;
+		this.builder = new ObjectBuilder(builder);
+		this.builder.setGameObject(this);
 		this.setRotation(builder.rotation);
 	}
 
@@ -61,15 +65,39 @@ private float rotation;
 	    
 	    // 4. Create the body fixture automatically by using the loader.
 	    model.loader.get().attachFixture(body, bodyRef, fd, scale);
-	    System.out.println(bodyRef);
 
 	    this.sprite = new Sprite(new Texture(model.loader.getSpritePath(bodyRef)));
 	    float ratio = sprite.getHeight() / sprite.getWidth();
 	    sprite.setSize(scale, scale * ratio);
 	    this.setBody(body);
 	    origin = model.loader.get().getOrigin(bodyRef, 0);
-	    this.builder = builder;
-	    builder.setGameObject(this);
+	}
+	public GameObject(Model model, String bodyRef, float x, float y, BodyType bodType, float scale, float density, float restitution, float friction, ObjectBuilder builder) {
+		this.screen = screen;
+		this.model = model;
+		
+		Body body;
+		 // 1. Create a BodyDef, as usual.
+	    BodyDef bd = new BodyDef();
+	    bd.position.set(x, y);
+	    bd.type = bodType;
+	    // 2. Create a FixtureDef, as usual.
+	    FixtureDef fd = new FixtureDef();
+	    fd.density = density;
+	    fd.friction = friction;
+	    fd.restitution = restitution;
+	 
+	    // 3. Create a Body, as usual.
+	    body = model.world.createBody(bd);
+	    
+	    // 4. Create the body fixture automatically by using the loader.
+	    model.loader.get().attachFixture(body, bodyRef, fd, scale);
+
+	    this.sprite = new Sprite(new Texture(model.loader.getSpritePath(bodyRef)));
+	    float ratio = sprite.getHeight() / sprite.getWidth();
+	    sprite.setSize(scale, scale * ratio);
+	    this.setBody(body);
+	    origin = model.loader.get().getOrigin(bodyRef, 0);
 	}
 	
 	public void delete() {
@@ -96,6 +124,7 @@ private float rotation;
 	
 public static class ObjectBuilder	 {
 		private String bodyRef;
+		String name;
 		private PlayScreen screen;
 		private Model model;
 		private BodyType bodyType = BodyType.DynamicBody;
@@ -113,6 +142,23 @@ public static class ObjectBuilder	 {
 			this.bodyRef = bodyRef;
 			this.screen = screen;
 			this.model = model;
+			this.name = bodyRef;
+		}
+		public ObjectBuilder(ObjectBuilder b) {
+			this.bodyRef = b.bodyRef;
+			this.name = b.name;
+			this.screen = b.screen;
+			this.model = b.model;
+			this.bodyType = b.bodyType;
+			this.x = b.x;
+			this.y = b.y;
+			this.scale = b.scale;
+			this.rotSpeed = b.rotSpeed;
+			this.rotation = b.rotation;
+			this.restitution = b.restitution;
+			this.friction = b.friction;
+			this.density = b.density;
+			this.gameObject = b.gameObject;
 		}
 		public ObjectBuilder bodyType(BodyType bodyType) {
 			this.bodyType = bodyType;
@@ -146,8 +192,9 @@ public static class ObjectBuilder	 {
 			this.density = density;
 			return this;
 		}
-		public ObjectBuilder restitution(float restutution) {
+		public ObjectBuilder restitution(float restitution) {
 			this.restitution = restitution;
+			System.out.println("RESTITUTION = " + restitution);
 			return this;
 		}
 		
@@ -156,6 +203,29 @@ public static class ObjectBuilder	 {
 		}
 		public void setGameObject(GameObject obj) {
 			this.gameObject = obj;
+		}
+		
+		
+		public String getBodyRef() {
+			return bodyRef;
+		}
+		public float getScale() {
+			return scale;
+		}
+		public BodyType getBodyType() {
+			return this.bodyType;
+		}
+		public float getRotation() {
+			return this.rotation;
+		}
+		public float getRestitution() {
+			return this.restitution;
+		}
+		public float getDensity() {
+			return this.density;
+		}
+		public float getFriction() {
+			return this.friction;
 		}
 	}
 
