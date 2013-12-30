@@ -2,6 +2,7 @@ package com.moe.editor;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
@@ -22,6 +23,7 @@ private ObjectList objList;
 		batch = new SpriteBatch();
 		this.controller = new Controller(this, camera);
 		objList = new ObjectList(this, model, editor, 730, 50);
+		objList.selection = 0;
 	}
 	
 	public void render(float delta) {
@@ -39,11 +41,18 @@ private ObjectList objList;
 		}
 		//draw the object list bar on top of everything else
 		objList.draw(batch);
+		editor.draw(batch);
 		batch.end();
 		
 		
 	}
+	public OrthographicCamera getCamera() {
+		return camera;
+	}
 	
+	public void unproject(Vector3 vec) {
+		camera.unproject(vec);
+	}
 	
 	public GameObject.ObjectBuilder getSelectedBuilder() {
 		return objList.getCurObject();
@@ -56,8 +65,10 @@ private ObjectList objList;
 		System.out.println("REG CLICK");
 		if (!objList.click(vec.x, vec.y)) {
 			camera.unproject(vec);
-			editor.createObject(vec, getSelectedBuilder());
-			editor.blankClick();
+			if (editor.getMode() == editor.CREATE)
+				editor.createObject(vec, getSelectedBuilder());
+			else 
+				editor.setMode(editor.CREATE);
 		}
 	}
 
@@ -77,6 +88,7 @@ private ObjectList objList;
 		}
 		if (selection >= 0) {
 			editor.setObject(model.getObject(selection));
+			System.out.println(model.getObject(selection).getSprite().getX() + ", " + model.getObject(selection).getSprite().getY());
 		} else {
 			editor.setObject(null);
 			for (int i = 0; i < model.getNumObjects(); i++) {
@@ -86,10 +98,15 @@ private ObjectList objList;
 		
 	}
 
+	public Texture getSelectedTexture() {
+		return objList.getSelectedTexture();
+	}
 	public void drag(float x, float y) {
 		if (editor.isObjectSelected()) {
 			
 		}
 		
 	}
+
+
 }

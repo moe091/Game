@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
@@ -19,6 +20,8 @@ import javax.swing.JTextField;
 import javax.swing.JButton;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class Properties extends JFrame {
 	private Model model;
@@ -44,6 +47,10 @@ public class Properties extends JFrame {
 	private JLabel lblSelectedobject;
 	private JButton btnUpdatebuilder;
 	private JLabel lblSelection;
+	private JRadioButton rdbtnEdit;
+	private JRadioButton rdbtnCreate;
+	private final ButtonGroup buttonGroup_1 = new ButtonGroup();
+	private JButton btnDeleteObject;
 
 
 	public Properties(Model model, Editor editor) {
@@ -51,7 +58,7 @@ public class Properties extends JFrame {
 		this.editor = editor;
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 525, 351);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -167,6 +174,29 @@ public class Properties extends JFrame {
 		contentPane.add(txtRotationSpeed, "8, 10, fill, default");
 		txtRotationSpeed.setColumns(10);
 		
+		rdbtnEdit = new JRadioButton("Edit");
+		rdbtnEdit.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				editModeChange();
+			}
+		});
+		buttonGroup_1.add(rdbtnEdit);
+		contentPane.add(rdbtnEdit, "4, 12");
+		
+		rdbtnCreate = new JRadioButton("Create");
+		rdbtnCreate.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				editModeChange();
+			}
+		});
+		buttonGroup_1.add(rdbtnCreate);
+		contentPane.add(rdbtnCreate, "6, 12");
+		
+		lblSelectedobject = new JLabel("selectedObject");
+		contentPane.add(lblSelectedobject, "4, 14");
+		
 		btnUpdate = new JButton("updateObject");
 		btnUpdate.addMouseListener(new MouseAdapter() {
 			@Override
@@ -174,19 +204,40 @@ public class Properties extends JFrame {
 				updateClicked();
 			}
 		});
+		contentPane.add(btnUpdate, "4, 16");
 		
 		btnUpdatebuilder = new JButton("updateBuilder");
 		btnUpdatebuilder.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseEntered(MouseEvent arg0) {
+			public void mousePressed(MouseEvent arg0) {
 				updateBuilderClick();
 			}
 		});
-		contentPane.add(btnUpdatebuilder, "8, 16");
+		contentPane.add(btnUpdatebuilder, "6, 16");
 		
-		lblSelectedobject = new JLabel("selectedObject");
-		contentPane.add(lblSelectedobject, "4, 18");
-		contentPane.add(btnUpdate, "8, 18");
+		btnDeleteObject = new JButton("Delete Object");
+		btnDeleteObject.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+				deleteObject();
+			}
+		});
+		contentPane.add(btnDeleteObject, "4, 18");
+	}
+
+	protected void deleteObject() {
+		editor.getSelectedObject().delete();
+		
+	}
+
+	protected void editModeChange() {
+		if (rdbtnEdit.isSelected()) {
+			editor.mode = editor.EDIT;
+		} else if (rdbtnCreate.isSelected()) {
+			editor.mode = editor.CREATE;
+		}
+		System.out.println("mode = " + editor.mode);
+		
 	}
 
 	protected void updateBuilderClick() {
@@ -195,13 +246,28 @@ public class Properties extends JFrame {
 	}
 
 	public float getFriction() {
-		return Float.parseFloat(txtFriction.getText());
+		try {
+			return Float.parseFloat(txtFriction.getText());
+		} catch (NumberFormatException e) {
+			System.out.println("Friction format error -Properties");
+			return 0.5f;
+		}
 	}
 	public float getDensity() {
-		return Float.parseFloat(txtDensity.getText());
+		try {
+			return Float.parseFloat(txtDensity.getText());
+		} catch (NumberFormatException e) {
+			System.out.println("Friction format error -Properties");
+			return 0.5f;
+		}
 	}
 	public float getRestitution() {
-		return Float.parseFloat(txtRestitution.getText());
+		try {
+			return Float.parseFloat(txtRestitution.getText());
+		} catch (NumberFormatException e) {
+			System.out.println("Friction format error -Properties");
+			return 0.5f;
+		}
 	}
 	protected void updateClicked() {
 		editor.updateProperties();
@@ -221,7 +287,7 @@ public class Properties extends JFrame {
 
 	public float getRotSpeed() {
 		try {
-			return Integer.parseInt(txtRotationSpeed.getText());
+			return Float.parseFloat(txtRotationSpeed.getText()) * MathUtils.degreesToRadians;
 		} catch (NumberFormatException e) {
 			return 0;
 		}
@@ -230,7 +296,7 @@ public class Properties extends JFrame {
 
 	public float getRotation() {
 		try {
-			return Integer.parseInt(txtRotation.getText());
+			return Float.parseFloat(txtRotation.getText()) * MathUtils.degreesToRadians;
 		} catch (NumberFormatException e) {
 			return 0;
 		}
@@ -248,6 +314,11 @@ public class Properties extends JFrame {
 	
 	
 	public void updatePropertiesWindow(GameObject.ObjectBuilder builder) {
+		if (builder.getGameObject() != null) {
+			this.rdbtnEdit.doClick();
+			this.lblSelectedobject.setText(builder.name);
+			editModeChange();
+		}
 		this.txtBodyref.setText(builder.getBodyRef());
 		this.txtScale.setText(Float.toString(builder.getScale()));
 		if (builder.getBodyType() == BodyType.DynamicBody) 
@@ -261,7 +332,7 @@ public class Properties extends JFrame {
 		this.txtRestitution.setText(Float.toString(builder.getRestitution()));
 		this.txtFriction.setText(Float.toString(builder.getFriction()));
 		this.txtDensity.setText(Float.toString(builder.getDensity()));
-		this.txtRotation.setText(Float.toString(builder.getRotation()));
+		this.txtRotation.setText(Float.toString(builder.getRotation() * MathUtils.radiansToDegrees));
 		
 		if (editor.isObjectSelected())
 			lblSelection.setText("Object");
@@ -269,6 +340,25 @@ public class Properties extends JFrame {
 			lblSelection.setText("Builder");
 		
 		System.out.println("UPDATE SHIT " + builder.getScale());
+	}
+
+	public void setMode(int mode) {
+		if (mode == editor.CREATE) {
+			rdbtnCreate.doClick();
+			this.lblSelectedobject.setText(editor.getBuilder().name);
+			editModeChange();
+		} else if (mode == editor.EDIT) {
+			rdbtnEdit.doClick();
+			this.lblSelectedobject.setText(editor.getSelectedObject().getBuilder().name);
+			editModeChange();
+		}
+	}
+
+	public int getMode() {
+		if (rdbtnCreate.isSelected())
+			return editor.CREATE;
+		else
+			return editor.EDIT;
 	}
 
 }

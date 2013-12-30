@@ -15,8 +15,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 public class Game implements ApplicationListener {
 	OrthographicCamera camera;
 	private GameScreen curScreen;
-	static float width = 800 / 30;
-	static float height = 480 / 30;
+	static float width = 800 / 50;
+	static float height = 480 / 50;
 	
 	@Override
 	public void create() {		

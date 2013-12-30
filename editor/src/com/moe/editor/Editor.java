@@ -1,5 +1,9 @@
 package com.moe.editor;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.moe.editor.GameObject.ObjectBuilder;
@@ -9,6 +13,7 @@ import com.moe.editor.GameObject.ObjectBuilder;
  */
 
 public class Editor {
+	static final int EDIT = 0, CREATE = 1;
 	/*
 	 * Either an object builder(new object from menu on the right) or an existing object(object already in the world
 	 * that has been selected to be edited) can eb selected at once. If an existing object is selected that gameObjects
@@ -20,14 +25,21 @@ public class Editor {
 	private int selIndex;
 	private GameObject selectedObject;
 	
+	int mode;
+	Vector3 vec = new Vector3();
+	Sprite curSprite;
+	
+	private Grid grid;
 	private View view;
 	private Model model;
 	private Properties properties;
-	
+	SpriteBatch bat = new SpriteBatch();
 	public Editor(View view, Model model) {
 		this.view = view;
 		this.model = model;
 		model.setEditor(this);
+		grid = new Grid(0.1f);
+		openProperties();
 	}
 	
 	
@@ -35,10 +47,17 @@ public class Editor {
 	//the view class will call a method in the editor that returns the current object and creates that
 	//for now it'll create whatever I hardcode into this method
 	public void createObject(Vector3 vec, GameObject.ObjectBuilder builder) {
-		model.queueObject(builder.location(vec.x, vec.y));
+		if (!Controller.shift)
+			model.queueObject(builder.location(grid.round(vec.x), grid.round(vec.y)));
+		else
+			model.queueObject(builder.location(vec.x, vec.y));
+		if (properties != null)
+			properties.setMode(CREATE);
 	}
 	
-	
+	public GameObject.ObjectBuilder getBuilder() {
+		return view.getSelectedBuilder();
+	}
 	public void setObject(GameObject object) {
 		selectedObject = object;
 		if (selectedObject != null) {
@@ -74,7 +93,8 @@ public class Editor {
 			Vector3 vec = new Vector3(selectedObject.getBody().getTransform().getPosition().x, selectedObject.getBody().getTransform().getPosition().y, 0);
 			
 			updateExistingObject(vec, selectedObject);
-			properties.updatePropertiesWindow(selectedObject.getBuilder());
+			if (selectedObject != null)
+				properties.updatePropertiesWindow(selectedObject.getBuilder());
 
 	}
 	
@@ -98,6 +118,10 @@ public class Editor {
 		builder.friction(properties.getFriction());
 		builder.restitution(properties.getRestitution());
 		builder.density(properties.getDensity());
+		if (curSprite!= null) {
+			//curSprite.setOrigin(Controller.mouseVec.x, Controller.mouseVec.y);
+			curSprite.setRotation(properties.getRotation());
+		}
 	}
 
 
@@ -114,10 +138,52 @@ public class Editor {
 	}
 
 
-	public void updateBuilderProps() {
+	public void updateBuilderProps () {
 		updateCurObject(view.getSelectedBuilder());
 		properties.updatePropertiesWindow(view.getSelectedBuilder());
 		System.out.println("IM THE ELSE");
+		
+	}
+
+
+	public void draw(SpriteBatch batch) {
+		if (curSprite != null) {
+
+			vec.x = Gdx.input.getX();
+			vec.y = Gdx.input.getY();
+			view.unproject(vec);
+			curSprite.setX(vec.x);
+			curSprite.setY(vec.y);
+			curSprite.setOrigin(view.getSelectedBuilder().origin.x, view.getSelectedBuilder().origin.y);
+			curSprite.setRotation(view.getSelectedBuilder().getRotation() * MathUtils.radiansToDegrees);
+			float ratio = curSprite.getHeight() / curSprite.getWidth();
+		    curSprite.setSize(view.getSelectedBuilder().getScale(), view.getSelectedBuilder().getScale() * ratio);
+		}
+		if (mode == CREATE && curSprite != null) {
+			if (!Controller.shift) {
+				vec.x = grid.round(vec.x);
+				vec.y = grid.round(vec.y);
+			}
+			curSprite.setX(vec.x);
+			curSprite.setY(vec.y);
+			bat.setProjectionMatrix(view.getCamera().combined);
+			bat.begin();
+			//bat.draw(view.getSelectedTexture(), Gdx.input.getX(), Gdx.input.getY(), view.getSelectedBuilder().getScale(), view.getSelectedBuilder().getScale());
+			curSprite.draw(bat);
+			bat.end();
+		}
+		
+	}
+
+
+	public int getMode() {
+		
+		return properties.getMode();
+	}
+
+
+	public void setMode(int mode) {
+		properties.setMode(CREATE);
 		
 	}
 }

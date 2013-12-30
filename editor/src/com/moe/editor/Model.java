@@ -42,8 +42,10 @@ public class Model {
 				//editor.setObject(creationQueue.get(i).build());
 				//gameObjects.add(editor.getSelectedObject());
 				gameObjects.add(creationQueue.get(i).build());
+				System.out.println(gameObjects.get(gameObjects.size - 1).getSprite().getWidth());
 			} else {
 				gameObjects.add(creationQueue.get(i).build());
+				System.out.println(gameObjects.get(gameObjects.size - 1).getSprite().getHeight());
 			}
 			creationQueue.removeIndex(i);
 			

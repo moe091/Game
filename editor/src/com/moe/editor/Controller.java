@@ -18,6 +18,8 @@ final int PROPERTIES = Keys.T;
 final float regSpeed = 5;
 final float fastSpeed = 25;
 
+static boolean shift = false;
+static Vector3 mouseVec = new Vector3();
 float[] downx, downy;
 float[] curx, cury;
 float[] deltax, deltay;
@@ -52,6 +54,11 @@ float speed = 5;
 	
 	public void update(float delta) {
 		//set speed, depending on whether the SPEED key is held
+		
+		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
+			shift = true;
+		else
+			shift = false;
 		if (Gdx.input.isKeyPressed(SPEED)) {
 			speed = fastSpeed;
 		} else {
@@ -122,7 +129,11 @@ float speed = 5;
 			} else if (isDown[i]) {
 				view.drag(deltax[i], deltay[i]);
 			}
+			
+			mouseVec.set(curx[0], cury[0], 0);
+			camera.project(mouseVec);
 		
+			
 		
 		}
 		

@@ -22,6 +22,8 @@ Array<String> bodies = new Array<String>();
 		bodies.add("ball");
 		bodies.add("blockPlastic");
 		bodies.add("lPlastic");
+		bodies.add("square1");
+		bodies.add("laser1");
 	}
 	
 	public String getSpritePath(String name) {

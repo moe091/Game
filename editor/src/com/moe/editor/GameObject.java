@@ -18,9 +18,10 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
  */
 public class GameObject {
 //BodyRef string is used to get the body, origin, and sprite info
+String bodyRef;
 private Body body;
 private Sprite sprite;
-private Vector2 origin;
+Vector2 origin;
 private ObjectBuilder builder;
 
 ObjectBuilder replacement;
@@ -30,8 +31,9 @@ PlayScreen screen;
 Model model;
 
 //Other attributes from builder
-private float rotationSpeed;
+private float rotationSpeed = .01f;
 private float rotation;
+
 
 	private GameObject(ObjectBuilder builder) {
 		//Mandatory
@@ -42,12 +44,14 @@ private float rotation;
 		this.builder = new ObjectBuilder(builder);
 		this.builder.setGameObject(this);
 		this.setRotation(builder.rotation);
+		System.out.println(bodyRef + ", builder! : " + origin.x);
 	}
 
 	//Only really need builder as a parameter. this stuf is all still here cause I didn't rewrite the code yet
 	public GameObject(Model model, String bodyRef, float x, float y, BodyType bodType, float scale, ObjectBuilder builder) {
 		this.screen = screen;
 		this.model = model;
+		this.bodyRef = bodyRef;
 		
 		Body body;
 		 // 1. Create a BodyDef, as usual.
@@ -70,12 +74,15 @@ private float rotation;
 	    float ratio = sprite.getHeight() / sprite.getWidth();
 	    sprite.setSize(scale, scale * ratio);
 	    this.setBody(body);
-	    origin = model.loader.get().getOrigin(bodyRef, 0);
+	    origin = new Vector2(model.loader.get().getOrigin(bodyRef, 0).x, model.loader.get().getOrigin(bodyRef, 0).y);
+	    System.out.println(bodyRef + ", LESS params : " + origin.x);
 	}
 	public GameObject(Model model, String bodyRef, float x, float y, BodyType bodType, float scale, float density, float restitution, float friction, ObjectBuilder builder) {
 		this.screen = screen;
 		this.model = model;
-		
+		this.bodyRef = builder.bodyRef;
+		rotation = builder.getRotation();
+		rotationSpeed = builder.getRotationSpeed();
 		Body body;
 		 // 1. Create a BodyDef, as usual.
 	    BodyDef bd = new BodyDef();
@@ -89,7 +96,6 @@ private float rotation;
 	 
 	    // 3. Create a Body, as usual.
 	    body = model.world.createBody(bd);
-	    
 	    // 4. Create the body fixture automatically by using the loader.
 	    model.loader.get().attachFixture(body, bodyRef, fd, scale);
 
@@ -97,10 +103,13 @@ private float rotation;
 	    float ratio = sprite.getHeight() / sprite.getWidth();
 	    sprite.setSize(scale, scale * ratio);
 	    this.setBody(body);
-	    origin = model.loader.get().getOrigin(bodyRef, 0);
+	    origin = new Vector2(model.loader.get().getOrigin(bodyRef, scale).x, model.loader.get().getOrigin(bodyRef, scale).y);
+	    System.out.println(bodyRef + ", params : " + origin.x);
+	    body.setTransform(body.getTransform().getPosition().x, body.getTransform().getPosition().y, rotation);
 	}
 	
 	public void delete() {
+		model.world.destroyBody(body);
 		model.removeObject(this);
 	}
 	
@@ -110,8 +119,13 @@ private float rotation;
 	}
 	
 	private void synch() {
+		if (body.getType() != BodyType.DynamicBody) {
+			rotation+= rotationSpeed;
+			body.setTransform(body.getTransform().getPosition().x, body.getTransform().getPosition().y, rotation);
+		}
 		sprite.setRotation(getBody().getTransform().getRotation() * MathUtils.radiansToDegrees);
-		sprite.setPosition(getBody().getTransform().getPosition().x + origin.x, getBody().getTransform().getPosition().y + origin.y);
+		sprite.setPosition(getBody().getTransform().getPosition().x - origin.x, getBody().getTransform().getPosition().y - origin.y);
+		//System.out.println("body: " + bodyRef + "ori x: " + origin.x);
 		sprite.setOrigin(origin.x, origin.y);
 	}
 	
@@ -125,12 +139,13 @@ private float rotation;
 public static class ObjectBuilder	 {
 		private String bodyRef;
 		String name;
+		Vector2 origin;
 		private PlayScreen screen;
 		private Model model;
 		private BodyType bodyType = BodyType.DynamicBody;
 		private float x, y;
 		private float scale = 2;
-		private float rotSpeed;
+		private float rotationSpeed;
 		private float rotation;
 		private float restitution = 0.8f;
 		private float density = 0.5f;
@@ -143,8 +158,11 @@ public static class ObjectBuilder	 {
 			this.screen = screen;
 			this.model = model;
 			this.name = bodyRef;
+			origin = new Vector2(model.loader.get().getOrigin(bodyRef, scale).x, model.loader.get().getOrigin(bodyRef, scale).y);
+			System.out.println("builder: " + origin.x);
 		}
 		public ObjectBuilder(ObjectBuilder b) {
+			this.model = b.model;
 			this.bodyRef = b.bodyRef;
 			this.name = b.name;
 			this.screen = b.screen;
@@ -153,24 +171,30 @@ public static class ObjectBuilder	 {
 			this.x = b.x;
 			this.y = b.y;
 			this.scale = b.scale;
-			this.rotSpeed = b.rotSpeed;
+			this.rotationSpeed = b.rotationSpeed;
 			this.rotation = b.rotation;
 			this.restitution = b.restitution;
 			this.friction = b.friction;
 			this.density = b.density;
 			this.gameObject = b.gameObject;
+			origin = new Vector2(model.loader.get().getOrigin(bodyRef, scale).x, model.loader.get().getOrigin(bodyRef, scale).y);
+			System.out.println("builder1: " + origin.x);
 		}
 		public ObjectBuilder bodyType(BodyType bodyType) {
 			this.bodyType = bodyType;
 			return this;
 		}
 		public ObjectBuilder location(float x, float y) {
+			origin = new Vector2(model.loader.get().getOrigin(bodyRef, scale).x, model.loader.get().getOrigin(bodyRef, scale).y);
+			System.out.println("builder2: " + origin.x);
 			this.x = x;
 			this.y = y;
 			return this;
 		}
 		public ObjectBuilder scale(float scale) {
 			this.scale = scale;
+			origin = new Vector2(model.loader.get().getOrigin(bodyRef, scale).x, model.loader.get().getOrigin(bodyRef, scale).y);
+			System.out.println("builder3: " + origin.x);
 			return this;
 		}
 		public ObjectBuilder rotation(float rotation) {
@@ -178,7 +202,7 @@ public static class ObjectBuilder	 {
 			return this;
 		}
 		public ObjectBuilder rotSpeed(float rotSpeed) {
-			this.rotSpeed = rotSpeed;
+			this.rotationSpeed = rotSpeed;
 			return this;
 		}
 		public GameObject build() {
@@ -208,6 +232,9 @@ public static class ObjectBuilder	 {
 		
 		public String getBodyRef() {
 			return bodyRef;
+		}
+		public float getRotationSpeed() {
+			return rotationSpeed;
 		}
 		public float getScale() {
 			return scale;

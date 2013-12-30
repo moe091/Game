@@ -71,7 +71,7 @@ private GameObject.ObjectBuilder curObject;
 		}
 		
 		editor.updatePropertiesWindow(curObject);
-		
+		editor.curSprite = new Sprite(buttons.get(selection).texture);
 	}
 
 	// This just draws the actual panel
@@ -80,10 +80,12 @@ private GameObject.ObjectBuilder curObject;
 		
 		batch.draw(sidebg, x - 20, y - 25, width + 20, height + 50);
 		for (int i = 0; i < buttons.size; i++) {
-			if (selection != i)
+			if (selection != i) {
 				batch.draw(back, x - 9, (y + i * (objectHeight + gap)) - 9, 68, 68);
-			else
+			} else {
 				batch.draw(selected, x - 9, (y + i * (objectHeight + gap)) - 9, 68, 68);
+			
+			}
 			if (buttons.get(i).texture.getWidth() <= buttons.get(i).texture.getHeight())
 				batch.draw(buttons.get(i).texture, x, y + i * (objectHeight + gap), objectWidth, objectHeight * ((float) buttons.get(i).texture.getWidth() / (float) buttons.get(i).texture.getHeight()));
 			else 
@@ -98,6 +100,15 @@ private GameObject.ObjectBuilder curObject;
 		batch.end();
 	}
 	
+	public Texture getSelectedTexture() {
+		if (buttons.size > selection && selection >= 0) {
+			return buttons.get(selection).texture;
+		} else {
+			System.out.println("BUTTON OUT OF RANGE -objectList");
+			return buttons.get(0).texture;
+			
+		}
+	}
 	public GameObject.ObjectBuilder getCurObject() {
 		return curObject;
 	}
