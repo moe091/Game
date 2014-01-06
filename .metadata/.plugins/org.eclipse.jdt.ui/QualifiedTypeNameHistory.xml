@@ -2,8 +2,33 @@
 <qualifiedTypeNameHistroy>
 <fullyQualifiedTypeName name="com.badlogic.gdx.graphics.Texture"/>
 <fullyQualifiedTypeName name="com.badlogic.gdx.graphics.g2d.Sprite"/>
-<fullyQualifiedTypeName name="com.badlogic.gdx.Gdx"/>
 <fullyQualifiedTypeName name="java.lang.Math"/>
 <fullyQualifiedTypeName name="com.moe.editor.GameObject.ObjectBuilder"/>
 <fullyQualifiedTypeName name="com.badlogic.gdx.math.MathUtils"/>
+<fullyQualifiedTypeName name="android.util.Config"/>
+<fullyQualifiedTypeName name="java.io.InputStream"/>
+<fullyQualifiedTypeName name="java.io.BufferedReader"/>
+<fullyQualifiedTypeName name="java.io.InputStreamReader"/>
+<fullyQualifiedTypeName name="java.io.IOException"/>
+<fullyQualifiedTypeName name="android.os.StrictMode"/>
+<fullyQualifiedTypeName name="java.net.HttpURLConnection"/>
+<fullyQualifiedTypeName name="java.net.URL"/>
+<fullyQualifiedTypeName name="android.widget.TextView"/>
+<fullyQualifiedTypeName name="com.moo.screenlock.R.id"/>
+<fullyQualifiedTypeName name="com.moe.editor.framework.RenderableWindow"/>
+<fullyQualifiedTypeName name="com.moe.editor.GameObject"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.physics.box2d.Body"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.physics.box2d.BodyDef"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.physics.box2d.BodyDef.BodyType"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.physics.box2d.FixtureDef"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.physics.box2d.CircleShape"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.physics.box2d.Fixture"/>
+<fullyQualifiedTypeName name="com.moe.editor.surface.Ball"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.Gdx"/>
+<fullyQualifiedTypeName name="com.moe.editor.Model"/>
+<fullyQualifiedTypeName name="com.moe.editor.surface.GameManager"/>
+<fullyQualifiedTypeName name="com.moe.editor.View"/>
+<fullyQualifiedTypeName name="com.moe.editor.PlayController"/>
+<fullyQualifiedTypeName name="com.moe.editor.Controller"/>
+<fullyQualifiedTypeName name="com.badlogic.gdx.utils.Array"/>
 </qualifiedTypeNameHistroy>

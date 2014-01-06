@@ -1,0 +1,141 @@
+package com.moe.editor;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector3;
+
+public class EditController extends Controller {
+
+
+	public EditController(View view, OrthographicCamera camera) {
+		super(view, camera);
+		this.view = view;
+		this.camera = camera;
+		
+		mouseVec = new Vector3();
+		
+		vec = new Vector3();
+		
+		downx = new float[2];
+		downy = new float[2];
+		curx = new float[2];
+		cury = new float[2];
+		deltax = new float[2];
+		deltay = new float[2];
+		timeDown = new float[2];
+		isDown = new boolean[2];
+		downEvent = new boolean[2];
+		upEvent = new boolean[2];
+	}
+	
+	public void update(float delta) {
+		play = false;
+		if (Gdx.input.isKeyPressed(PLAY)) {
+			play = true;
+		}
+		
+		//set speed, depending on whether the SPEED key is held
+		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
+			shift = true;
+		else
+			shift = false;
+		if (Gdx.input.isKeyPressed(SPEED)) {
+			speed = fastSpeed;
+		} else {
+			speed = regSpeed;
+		}
+		//check for movement keys and translate/zoom camera based on which ones are pressed
+		if (Gdx.input.isKeyPressed(LEFT))
+			camera.translate(-(speed * delta), 0);
+		if (Gdx.input.isKeyPressed(RIGHT))
+			camera.translate((speed * delta), 0);
+		if (Gdx.input.isKeyPressed(UP))
+			camera.translate(0, speed * delta);
+		if (Gdx.input.isKeyPressed(DOWN))
+			camera.translate(0, -(speed * delta));
+		
+		if (Gdx.input.isKeyPressed(ZOOMOUT))
+			camera.zoom = camera.zoom - (speed * delta) / 3;
+		if (Gdx.input.isKeyPressed(ZOOMIN))
+			camera.zoom = camera.zoom + (speed * delta) / 3;
+		
+		if (Gdx.input.isKeyPressed(PROPERTIES)) {
+			view.openProperties();
+		}
+		
+		
+		for (int i = 0; i < 2; i++) {
+			downEvent[i] = false;
+			upEvent[i] = false;
+			if (Gdx.input.isTouched(i))	 {
+				if (isDown[i]) {
+					//Touch Drag event
+					curx[i] = Gdx.input.getX(i);
+					cury[i] = Gdx.input.getY(i);
+					
+					deltax[i] = curx[i] - downx[i];
+					deltay[i] = cury[i] - downy[i];
+					
+					timeDown[i]+= delta;
+				} else {
+					//Touch Down event
+					isDown[i] = true;
+					downEvent[i] = true;
+					timeDown[i] = 0;
+					
+					downx[i] = Gdx.input.getX(i);
+					downy[i] = Gdx.input.getY(i);
+					
+					curx[i] = Gdx.input.getX(i);
+					cury[i] = Gdx.input.getY(i);
+				}
+			} else {
+				if (isDown[i]) {
+					upEvent[i] = true;
+					isDown[i] = false;
+				} else {
+					//Nothing happening
+				}
+			}
+			
+			if (downEvent[i]) {
+				if (Gdx.input.isKeyPressed(ALT)) {
+					vec.set(downx[i], downy[i], 0);
+					view.altClick(vec);
+				} else {
+					vec.set(downx[i], downy[i], 0);
+					view.click(vec);
+				}
+			} else if (isDown[i]) {
+				view.drag(deltax[i], deltay[i]);
+			}
+			
+			mouseVec.set(curx[0], cury[0], 0);
+			camera.project(mouseVec);
+		
+			
+		
+		}
+		
+
+	}
+
+	@Override
+	public void downEvent(boolean alt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dragEvent(boolean alt) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void upEvent(boolean alt) {
+		// TODO Auto-generated method stub
+		
+	}
+}

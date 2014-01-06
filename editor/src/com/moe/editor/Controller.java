@@ -5,7 +5,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector3;
 
-public class Controller {
+public abstract class Controller {
 final int LEFT = Keys.A;
 final int RIGHT = Keys.D;
 final int UP = Keys.W;
@@ -15,11 +15,20 @@ final int ZOOMIN = Keys.F;
 final int SPEED = Keys.SHIFT_LEFT;
 final int ALT = Keys.ALT_LEFT;
 final int PROPERTIES = Keys.T;
+final int PLAY = Keys.P;
+
 final float regSpeed = 5;
 final float fastSpeed = 25;
 
-static boolean shift = false;
-static Vector3 mouseVec = new Vector3();
+public boolean left = false;
+public boolean right = false;
+public boolean up = false;
+public boolean down = false;
+public boolean play = false;
+public boolean shift = false;
+
+
+static Vector3 mouseVec;
 float[] downx, downy;
 float[] curx, cury;
 float[] deltax, deltay;
@@ -38,6 +47,8 @@ float speed = 5;
 		this.view = view;
 		this.camera = camera;
 		
+		mouseVec = new Vector3();
+		
 		vec = new Vector3();
 		
 		downx = new float[2];
@@ -53,8 +64,12 @@ float speed = 5;
 	}
 	
 	public void update(float delta) {
-		//set speed, depending on whether the SPEED key is held
+		play = false;
+		if (Gdx.input.isKeyPressed(PLAY)) {
+			play = true;
+		}
 		
+		//set speed, depending on whether the SPEED key is held
 		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT))
 			shift = true;
 		else
@@ -64,24 +79,27 @@ float speed = 5;
 		} else {
 			speed = regSpeed;
 		}
+		
 		//check for movement keys and translate/zoom camera based on which ones are pressed
 		if (Gdx.input.isKeyPressed(LEFT))
-			camera.translate(-(speed * delta), 0);
+			left = true;
+		else
+			left = false;
+		
 		if (Gdx.input.isKeyPressed(RIGHT))
-			camera.translate((speed * delta), 0);
+			right = true;
+		else
+			right = false;
+		
 		if (Gdx.input.isKeyPressed(UP))
-			camera.translate(0, speed * delta);
+			up = true;
+		else
+			up = false;
+		
 		if (Gdx.input.isKeyPressed(DOWN))
-			camera.translate(0, -(speed * delta));
-		
-		if (Gdx.input.isKeyPressed(ZOOMOUT))
-			camera.zoom = camera.zoom - (speed * delta) / 3;
-		if (Gdx.input.isKeyPressed(ZOOMIN))
-			camera.zoom = camera.zoom + (speed * delta) / 3;
-		
-		if (Gdx.input.isKeyPressed(PROPERTIES)) {
-			view.openProperties();
-		}
+			down = true;
+		else
+			down = false;
 		
 		
 		for (int i = 0; i < 2; i++) {
@@ -110,7 +128,8 @@ float speed = 5;
 					cury[i] = Gdx.input.getY(i);
 				}
 			} else {
-				if (isDown[i]) {
+				if (isDown[i]) { //UP EVENT
+					upEvent(false);
 					upEvent[i] = true;
 					isDown[i] = false;
 				} else {
@@ -120,14 +139,12 @@ float speed = 5;
 			
 			if (downEvent[i]) {
 				if (Gdx.input.isKeyPressed(ALT)) {
-					vec.set(downx[i], downy[i], 0);
-					view.altClick(vec);
+					downEvent(true);
 				} else {
-					vec.set(downx[i], downy[i], 0);
-					view.click(vec);
+					downEvent(false);
 				}
 			} else if (isDown[i]) {
-				view.drag(deltax[i], deltay[i]);
+				dragEvent(false);
 			}
 			
 			mouseVec.set(curx[0], cury[0], 0);
@@ -139,4 +156,15 @@ float speed = 5;
 		
 
 	}
+	/*
+	 * TOOLTIP
+	 * downx and downy for coords
+	 */
+	public abstract void downEvent(boolean alt);
+	
+	//deltax and deltay for drag distance. curx/cury for current coords. need to ad shit to keep track of drag distance from last frame only
+	public abstract void dragEvent(boolean alt);
+	
+	// curx/cury for coords
+	public abstract void upEvent(boolean alt);
 }

@@ -35,6 +35,12 @@ private float rotationSpeed = .01f;
 private float rotation;
 
 
+
+	public GameObject(Model model, Body body) {
+		this.model = model;
+		this.body = body;
+	}
+	
 	private GameObject(ObjectBuilder builder) {
 		//Mandatory
 		this(builder.model, builder.bodyRef, builder.x, builder.y, builder.bodyType, builder.scale, builder.density, builder.restitution, builder.friction, builder);

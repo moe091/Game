@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.moe.editor.surface.GameManager;
 
 
 
@@ -17,10 +18,22 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
  * and controllers update function will be called from render
  * 
  */
+
+/*
+ * PlayScreen Gets updated by the Game class every frame, it holds the model/view/controller structure and updates them
+ * at the appropriate times. PlayScreen represents the entire in-game/playing part of the game.
+ * 
+ * -Future:
+ * 	Constuctor will take a GameFile or a handle to the savegame file and handle updating the model and everything and setting hte level
+ * 	based on the save.
+ * 	
+ * 	On close will handle savign the game and whatnot and safely closing out/destroying all the other objects and stuff.
+ */
 public class PlayScreen extends GameScreen {
 	private Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
 	private Model model;
 	private View view;
+	private GameManager manager;
 	
 	public PlayScreen(Game game) {
 		super(game);
@@ -33,6 +46,8 @@ public class PlayScreen extends GameScreen {
 		game.camera.position.x = game.width / 2;
 		game.camera.position.y = game.height / 2;
 		game.camera.update();
+		
+		manager = new GameManager(view, model, game.camera);
 	}
 	
 	/*
@@ -40,12 +55,21 @@ public class PlayScreen extends GameScreen {
 	 * then update the model so it can update the position of all the objects before rendering
 	 * and finally tell the view to render everything now that it's all updated
 	 */
+	
 	@Override
 	public void render(float delta) {
 		
 		model.update(delta);
 		view.render(delta);
 		debugRenderer.render(model.world, game.camera.combined);
+		
+		if (view.getController().play) {
+			if (!manager.playing) 
+				manager.startPlaying(2, 2);
+		}
+		
+		if (manager.playing)
+			manager.update(delta);
 		
 	}
 

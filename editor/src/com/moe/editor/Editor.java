@@ -7,6 +7,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.moe.editor.GameObject.ObjectBuilder;
+import com.moe.editor.surface.Ball;
+import com.moe.editor.surface.GameManager;
 
 /*
  * controls editing game objects
@@ -34,12 +36,14 @@ public class Editor {
 	private Model model;
 	private Properties properties;
 	SpriteBatch bat = new SpriteBatch();
+	
 	public Editor(View view, Model model) {
 		this.view = view;
 		this.model = model;
 		model.setEditor(this);
-		grid = new Grid(0.1f);
+		grid = new Grid(0.5f);
 		openProperties();
+		
 	}
 	
 	
@@ -47,7 +51,7 @@ public class Editor {
 	//the view class will call a method in the editor that returns the current object and creates that
 	//for now it'll create whatever I hardcode into this method
 	public void createObject(Vector3 vec, GameObject.ObjectBuilder builder) {
-		if (!Controller.shift)
+		if (!view.getController().shift)
 			model.queueObject(builder.location(grid.round(vec.x), grid.round(vec.y)));
 		else
 			model.queueObject(builder.location(vec.x, vec.y));
@@ -160,12 +164,12 @@ public class Editor {
 		    curSprite.setSize(view.getSelectedBuilder().getScale(), view.getSelectedBuilder().getScale() * ratio);
 		}
 		if (mode == CREATE && curSprite != null) {
-			if (!Controller.shift) {
+			if (!view.getController().shift) {
 				vec.x = grid.round(vec.x);
 				vec.y = grid.round(vec.y);
 			}
-			curSprite.setX(vec.x);
-			curSprite.setY(vec.y);
+			curSprite.setX(vec.x - view.getSelectedBuilder().origin.x);
+			curSprite.setY(vec.y - view.getSelectedBuilder().origin.y);
 			bat.setProjectionMatrix(view.getCamera().combined);
 			bat.begin();
 			//bat.draw(view.getSelectedTexture(), Gdx.input.getX(), Gdx.input.getY(), view.getSelectedBuilder().getScale(), view.getSelectedBuilder().getScale());

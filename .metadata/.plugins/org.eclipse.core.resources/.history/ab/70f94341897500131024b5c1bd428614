@@ -1,0 +1,17 @@
+package com.moe.editor.surface;
+
+import com.moe.editor.GameObject;
+
+public class Ball extends GameObject {
+
+	
+	
+	public static Ball getNewBall(float x, float y) {
+		Ball ball = new Ball();
+		
+		return ball;
+	}
+	public Ball() {
+		super();
+	}
+}

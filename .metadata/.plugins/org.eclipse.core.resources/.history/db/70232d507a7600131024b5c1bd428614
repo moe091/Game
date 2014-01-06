@@ -1,0 +1,5 @@
+package com.moe.editor.framework;
+
+public class DragListener {
+
+}

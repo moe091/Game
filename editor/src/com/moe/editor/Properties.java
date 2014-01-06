@@ -24,7 +24,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
 public class Properties extends JFrame {
-	private Model model;
 	private Editor editor;
 	
 	private JPanel contentPane;
@@ -54,7 +53,6 @@ public class Properties extends JFrame {
 
 
 	public Properties(Model model, Editor editor) {
-		this.model = model;
 		this.editor = editor;
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

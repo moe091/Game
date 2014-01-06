@@ -7,6 +7,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
+/*
+ * View handles drawing everything for hte playscreen. it holds different kinds of drawables(Eventually I should
+ * make Model a drawable so it can be drawn just like the background and ui and everything else -SOUNDS LIKE A GOOD IDEA)
+ * 
+ * View also serves to decouple controller/model and mediate their interactions.
+ */
 public class View {
 private Model model;
 private SpriteBatch batch;
@@ -21,7 +27,7 @@ private ObjectList objList;
 		this.camera = camera;
 		editor = new Editor(this, model);
 		batch = new SpriteBatch();
-		this.controller = new Controller(this, camera);
+		this.controller = new EditController(this, camera);
 		objList = new ObjectList(this, model, editor, 730, 50);
 		objList.selection = 0;
 	}
@@ -76,6 +82,8 @@ private ObjectList objList;
 		editor.openProperties();
 		
 	}
+	
+	
 
 	public void altClick(Vector3 vec) {
 		System.out.println("ALT CLICK");
@@ -108,5 +116,12 @@ private ObjectList objList;
 		
 	}
 
+	public void setController(Controller controller) {
+		this.controller = controller;
+	}
+	
+	public Controller getController() {
+		return this.controller;
+	}
 
 }

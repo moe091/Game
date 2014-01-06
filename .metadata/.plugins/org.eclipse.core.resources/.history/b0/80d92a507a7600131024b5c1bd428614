@@ -1,0 +1,7 @@
+package com.moe.editor.framework;
+
+public interface MouseListener {
+
+	public void startDrag(float x, float y);
+	public void drag(float deltaX, float deltaY);
+}

@@ -1,0 +1,20 @@
+package com.moe.editor.surface;
+
+import com.badlogic.gdx.Gdx;
+import com.moe.editor.Controller;
+
+public class GameManager {
+
+	Controller controller;
+	
+	public GameManager(Controller controller) {
+		this.controller = controller;
+	}
+	
+	
+	public void update(float delta) {
+		if (Gdx.input.isKeyPressed(controller.PLAY)) {
+			
+		}
+	}
+}

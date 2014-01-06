@@ -1,12 +1,14 @@
 package com.moe.editor;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.utils.Array;
 import com.moe.editor.GameObject.ObjectBuilder;
+import com.moe.editor.framework.RenderableWindow;
 
 /*
  * Model holds the world and all the objects in it. It has an update function which can be called to update the world and objects
@@ -14,10 +16,12 @@ import com.moe.editor.GameObject.ObjectBuilder;
  * update things and make changes based on input. 
  * 
  * This is the internal representation of the entire game world
+ * 
+ * Should basically be a bucket of objects with some helpful methods for operating on them. outside classes shouldn't have to know what goes on inside the view there should just be methods to do what they want.
  */
-public class Model {
+public class Model implements RenderableWindow {
 	//the physics world and loader(might move loader later)
-	World world;
+	public World world;
 	Editor editor;
 	Loader loader; //might move
 	//the array that holds all the objects in the game
@@ -93,6 +97,24 @@ public class Model {
 
 	public int getIndex(GameObject object) {
 		return gameObjects.indexOf(object, true);
+	}
+
+	@Override
+	public void draw(SpriteBatch drawBatch) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean click(float x, float y) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void relativeClick(float x, float y) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

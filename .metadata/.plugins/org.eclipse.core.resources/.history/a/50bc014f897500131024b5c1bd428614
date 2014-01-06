@@ -1,0 +1,22 @@
+package com.moe.editor.surface;
+
+import com.badlogic.gdx.physics.box2d.Body;
+import com.moe.editor.GameObject;
+import com.moe.editor.Model;
+
+public class Ball extends GameObject {
+
+	
+	
+	public static Ball getNewBall(Model model, float x, float y) {
+		Ball ball = new Ball(model);
+		
+		Body body;
+		
+		BodyDef bd = new BodyDef();
+		return ball;
+	}
+	public Ball(Model model) {
+		super(model);
+	}
+}

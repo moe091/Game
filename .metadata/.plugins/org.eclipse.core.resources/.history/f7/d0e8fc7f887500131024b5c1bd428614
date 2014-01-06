@@ -1,0 +1,9 @@
+package com.moe.editor;
+
+import com.moe.editor.PlayScreen;
+
+public class PlayMode {
+
+	
+	public PlayMode(PlayScreen screen, Model)
+}
